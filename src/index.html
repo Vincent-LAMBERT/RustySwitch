@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <div class="row">
+        <a
+          href="https://github.com/Vincent-LAMBERT/RustySwitch"
+          target="_blank"
+        >
+          <img
+            src="/assets/RustySwitch.svg"
+            class="logo vanilla"
+            alt="RustySwitch logo"
+          />
+        </a>
+
+        <div class="row">
+          <div class="block-row">
+            <p>Main</p>
+            <p>Secondary</p>
+            <p>Shortcut</p>
+          </div>
+          <div class="block-row">
+            <select id="mainSelect" data-choice placeholder="Pick a main audio output"></select>
+            <select id="secondSelect" data-choice placeholder="Pick a secondary audio output"></select>
+            <input type="entry"></input>
+          </div>
+        </div>
+      </div>
+          
+    </main>
+  </body>
+</html>
