@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tauri App</title>
-    <script type="module" src="/main.js" defer></script>
+    <script type="module" src="./main.js" defer></script>
   </head>
 
   <body>
@@ -22,20 +22,22 @@
           />
         </a>
 
-        <div class="row">
-          <div class="block-row">
-            <p>Main</p>
-            <p>Secondary</p>
-            <p>Shortcut</p>
+        <div class="column">
+          <div class="row">
+            <div class="block-row">
+              <p>Main</p>
+              <p>Secondary</p>
+              <p>Shortcut</p>
+            </div>
+            <div class="block-row">
+              <select id="mainSelect" data-choice placeholder="Pick a main audio output"></select>
+              <select id="secondSelect" data-choice placeholder="Pick a secondary audio output"></select>
+              <input id="shortcutInput" type="text" placeholder="Press a key combination..."></input>
+            </div>
           </div>
-          <div class="block-row">
-            <select id="mainSelect" data-choice placeholder="Pick a main audio output"></select>
-            <select id="secondSelect" data-choice placeholder="Pick a secondary audio output"></select>
-            <input type="entry"></input>
-          </div>
+          <button id="save-btn">Save</button>
         </div>
       </div>
-          
     </main>
   </body>
 </html>

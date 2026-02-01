@@ -1,7 +1,9 @@
-use std::process::Command;
-use log::{info};
+// use log::info;
 use std::collections::HashMap;
 use std::io::{BufRead, BufReader};
+use std::process::Command;
+use tauri_plugin_store::StoreExt;
+use serde_json::Value;
 
 fn parse_pactl_list() -> HashMap<String, HashMap<String, String>> {
     // Execute the `pactl list` command
@@ -31,7 +33,10 @@ fn parse_pactl_list() -> HashMap<String, HashMap<String, String>> {
         }
 
         // Check if the line is a section header (e.g., "Sink #0")
-        if line.starts_with(char::is_alphabetic) && !line.starts_with('\t') && !line.starts_with(' ') {
+        if line.starts_with(char::is_alphabetic)
+            && !line.starts_with('\t')
+            && !line.starts_with(' ')
+        {
             // Save the previous section if it exists
             if !current_section.is_empty() {
                 result.insert(current_section.clone(), current_map);
@@ -54,9 +59,8 @@ fn parse_pactl_list() -> HashMap<String, HashMap<String, String>> {
         result.insert(current_section, current_map);
     }
 
-    return result
+    return result;
 }
-
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -76,7 +80,7 @@ fn get_sound_server() -> String {
 
         let pulseaudio_str = String::from_utf8_lossy(&output_pulseaudio.stdout);
         let pipewire_str = String::from_utf8_lossy(&output_pipewire.stdout);
-        
+
         if pulseaudio_str != "" {
             sound_server = "pulseaudio".to_string()
         } else if pipewire_str != "" {
@@ -84,7 +88,7 @@ fn get_sound_server() -> String {
         } else {
             panic!("Not implemented for other sound servers than pulseaudio or pipewire!");
         }
-        info!("sound_server: {}", sound_server);
+        // info!("sound_server: {}", sound_server);
     }
     return sound_server;
 }
@@ -102,7 +106,7 @@ fn get_audio_outputs(sound_server: String) -> (Vec<String>, Option<String>) {
 }
 
 fn get_outputs_pulseaudio() -> (Vec<String>, Option<String>) {
-    return (Vec::<String>::new(), None)
+    return (Vec::<String>::new(), None);
 }
 
 fn get_outputs_pipewire() -> (Vec<String>, Option<String>) {
@@ -127,14 +131,58 @@ fn get_outputs_pipewire() -> (Vec<String>, Option<String>) {
         }
     }
 
-    return (descriptions, active_sink_desc)
+    return (descriptions, active_sink_desc);
 }
 
+#[tauri::command]
+async fn set_key_in_store(app: tauri::AppHandle, key: &str, value: Value) -> Result<(), String> {
+    let store = app.store("store.json").map_err(|e| e.to_string())?;
+    store.set(key, value);
+    let _ = print_store_contents(&app);
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_value_in_store(app: tauri::AppHandle, key: &str) -> Result<Value, String> {
+    let store = app.store("store.json").map_err(|e| e.to_string())?;
+    let value = store.get(key).ok_or_else(|| "Key not found in store".to_string())?;
+    Ok(value)
+}
+
+fn print_store_contents(app: &tauri::AppHandle) -> Result<(), String> {
+    let store = app.store("store.json").map_err(|e| e.to_string())?;
+
+    // Get all keys in the store
+    let keys = store.keys();
+
+    // Iterate over keys and print their values
+    for key in keys {
+        let value = store.get(&key);
+        println!("Key: {}, Value: {:?}", key, value);
+    }
+
+    Ok(())
+}
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())        
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![get_sound_server, get_audio_outputs])
+        .invoke_handler(tauri::generate_handler![
+            get_sound_server,
+            get_audio_outputs,
+            set_key_in_store,
+            get_value_in_store,
+        ])
+        .setup(|app| {
+            let store = app.store("store.json")?;
+            if let Some(value) = store.get("takenValues") {
+                println!("{}", value);
+            } else {
+                println!("Key 'takenValues' not found in store.");
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -44,16 +44,28 @@ p {
   filter: drop-shadow(0 0 2em #24c8db);
 }
 
+.column {
+  display: block;
+}
+
 .row {
   display: flex;
   justify-content: center;
   gap: 30px
 }
 
-.block-row {
+.block-row { 
   display: grid;
   justify-content: center;
   gap: 15px
+}
+
+#save-btn {
+  margin-top: 20px;
+  margin-right: auto;
+  margin-left: auto;
+  width: 80%;
+  /* height: 90%; */
 }
 
 a {
